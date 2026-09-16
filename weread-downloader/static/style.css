@@ -1,0 +1,77 @@
+/* WeRead Downloader — minimal clean style */
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background: #f5f5f5; color: #333; }
+
+/* Navbar */
+.navbar { display: flex; align-items: center; justify-content: space-between; padding: 12px 24px; background: #1a1a2e; color: #fff; }
+.logo { font-size: 18px; font-weight: 600; }
+.nav-right { display: flex; gap: 12px; align-items: center; }
+.user-name { font-size: 14px; opacity: 0.8; }
+.nav-right button { background: none; color: #fff; border: 1px solid rgba(255,255,255,0.3); padding: 6px 16px; border-radius: 6px; cursor: pointer; font-size: 14px; }
+.nav-right button:hover { background: rgba(255,255,255,0.1); }
+
+/* Views */
+.view { max-width: 1100px; margin: 0 auto; padding: 24px; }
+.login-view { display: flex; justify-content: center; align-items: center; min-height: 70vh; }
+
+/* Cards */
+.card { background: #fff; border-radius: 12px; padding: 32px; box-shadow: 0 2px 12px rgba(0,0,0,0.08); max-width: 460px; width: 100%; }
+.login-card { text-align: center; }
+.login-card h2 { margin-bottom: 24px; }
+.qr-image { width: 240px; height: 240px; border: 1px solid #eee; border-radius: 8px; margin: 16px auto; display: block; }
+.qr-url { font-size: 12px; color: #888; word-break: break-all; margin: 8px 0; }
+.hint { color: #666; font-size: 14px; margin-top: 12px; }
+
+/* OTP */
+.otp-form { margin-top: 16px; }
+.otp-input { width: 80px; font-size: 24px; text-align: center; padding: 8px; border: 2px solid #1a1a2e; border-radius: 8px; margin: 12px 8px 12px 0; }
+.otp-form button { padding: 8px 24px; background: #1a1a2e; color: #fff; border: none; border-radius: 6px; cursor: pointer; }
+
+/* Buttons */
+button.primary-btn, .primary-btn { background: #1a1a2e; color: #fff; border: none; padding: 10px 24px; border-radius: 8px; cursor: pointer; font-size: 14px; }
+button.primary-btn:hover, .primary-btn:hover { background: #16213e; }
+button:disabled { opacity: 0.5; cursor: not-allowed; }
+.back-btn { background: none; border: none; color: #1a1a2e; font-size: 14px; cursor: pointer; margin-bottom: 16px; }
+
+/* Error */
+.error { color: #d32f2f; font-size: 14px; margin-top: 12px; }
+
+/* Loading */
+.loading { text-align: center; padding: 32px; color: #888; font-size: 14px; }
+.empty-msg { text-align: center; padding: 48px; color: #aaa; }
+
+/* Shelf */
+.shelf-toolbar { display: flex; gap: 12px; margin-bottom: 20px; align-items: center; }
+.search-input { flex: 1; padding: 10px 16px; border: 1px solid #ddd; border-radius: 8px; font-size: 14px; }
+
+/* Book grid */
+.book-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 20px; }
+.book-card { background: #fff; border-radius: 10px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.06); cursor: pointer; transition: transform 0.15s; }
+.book-card:hover { transform: translateY(-2px); box-shadow: 0 4px 16px rgba(0,0,0,0.1); }
+.book-cover { width: 100%; aspect-ratio: 3/4; object-fit: cover; background: #eee; }
+.book-info { padding: 10px 12px; }
+.book-title { font-size: 13px; font-weight: 600; line-height: 1.3; overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+.book-author { font-size: 12px; color: #888; margin-top: 4px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* Detail */
+.detail-header { display: flex; gap: 20px; margin-bottom: 20px; align-items: center; }
+.detail-cover { width: 100px; height: 140px; object-fit: cover; border-radius: 8px; background: #eee; }
+.detail-header h2 { font-size: 20px; }
+
+/* Chapter list */
+.chapter-actions { display: flex; gap: 12px; margin-bottom: 16px; }
+.chapter-list { background: #fff; border-radius: 10px; overflow: hidden; }
+.chapter-item { display: flex; align-items: center; gap: 12px; padding: 12px 16px; border-bottom: 1px solid #f0f0f0; cursor: pointer; font-size: 14px; }
+.chapter-item:hover { background: #fafafa; }
+.chapter-item.selected { background: #e8f0fe; }
+.ch-title { flex: 1; }
+.ch-words { color: #888; font-size: 12px; }
+
+/* Download progress */
+.progress-info { margin: 20px 0; }
+.progress-bar { height: 8px; background: #eee; border-radius: 4px; overflow: hidden; margin: 12px 0; }
+.progress-fill { height: 100%; background: #1a1a2e; transition: width 0.3s; border-radius: 4px; }
+.download-done { text-align: center; margin-top: 20px; }
+.download-done .primary-btn { display: inline-block; text-decoration: none; margin-top: 12px; }
+.download-actions { margin-top: 16px; text-align: center; }
+.download-actions button { background: #d32f2f; color: #fff; border: none; padding: 8px 24px; border-radius: 6px; cursor: pointer; }

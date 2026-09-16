@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>微信读书下载器</title>
+  <link rel="stylesheet" href="/static/style.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+</head>
+<body>
+<div id="app" x-data="app()" x-init="init()">
+
+  <!-- ======== NAVBAR ======== -->
+  <nav class="navbar">
+    <h1 class="logo">📚 微信读书下载器</h1>
+    <div class="nav-right">
+      <span x-show="loggedIn" class="user-name" x-text="accountName"></span>
+      <button x-show="!loggedIn" @click="startLogin()">扫码登录</button>
+      <button x-show="loggedIn" @click="loadShelf()">书架</button>
+    </div>
+  </nav>
+
+  <!-- ======== LOGIN VIEW ======== -->
+  <div x-show="view === 'login'" class="view login-view">
+    <div class="card login-card">
+      <h2>扫码登录微信读书</h2>
+      <template x-if="qrImageUrl">
+        <div>
+          <img :src="qrImageUrl" alt="QR Code" class="qr-image">
+          <p class="qr-url" x-text="confirmUrl"></p>
+          <p class="hint">请用微信扫描二维码，确认后等待自动跳转</p>
+        </div>
+      </template>
+      <template x-if="loginStatus === 'awaiting_otp'">
+        <div class="otp-form">
+          <p>请输入手机上显示的四位验证码：</p>
+          <input type="text" maxlength="4" pattern="\d{4}" x-model="otpInput"
+                 @keyup.enter="submitOtp()" class="otp-input" autofocus>
+          <button @click="submitOtp()">确认</button>
+          <p x-show="otpError" class="error" x-text="otpError"></p>
+        </div>
+      </template>
+      <template x-if="loginError">
+        <p class="error" x-text="loginError"></p>
+      </template>
+      <template x-if="!qrImageUrl && !loginError">
+        <button @click="startLogin()" class="primary-btn">生成二维码</button>
+      </template>
+    </div>
+  </div>
+
+  <!-- ======== SHELF VIEW ======== -->
+  <div x-show="view === 'shelf'" class="view">
+    <div class="shelf-toolbar">
+      <input type="text" placeholder="搜索书籍..." x-model="searchQuery"
+             @keyup.enter="searchBooks()" class="search-input">
+      <button @click="searchBooks()" class="primary-btn">搜索</button>
+      <button @click="loadShelf()">书架</button>
+    </div>
+
+    <div class="book-grid">
+      <template x-for="book in displayedBooks" :key="book.book_id || book.bookId">
+        <div class="book-card" @click="selectBook(book)">
+          <img :src="book.cover" alt="cover" class="book-cover" loading="lazy"
+               onerror="this.style.display='none'">
+          <div class="book-info">
+            <p class="book-title" x-text="book.title"></p>
+            <p class="book-author" x-text="book.author"></p>
+          </div>
+        </div>
+      </template>
+    </div>
+
+    <p x-show="displayedBooks.length === 0 && !loading" class="empty-msg">暂无书籍</p>
+    <div x-show="loading" class="loading">加载中...</div>
+  </div>
+
+  <!-- ======== BOOK DETAIL VIEW ======== -->
+  <div x-show="view === 'detail'" class="view">
+    <button @click="view = 'shelf'" class="back-btn">← 返回</button>
+    <div class="detail-header" x-show="selectedBook">
+      <img :src="selectedBook?.cover" alt="cover" class="detail-cover">
+      <div>
+        <h2 x-text="selectedBook?.title"></h2>
+        <p class="book-author" x-text="selectedBook?.author"></p>
+      </div>
+    </div>
+
+    <div class="chapter-actions">
+      <button @click="selectAllChapters()" class="primary-btn">全选</button>
+      <button @click="downloadSelected()" class="primary-btn"
+              :disabled="selectedChapters.length === 0">
+        下载选中 (<span x-text="selectedChapters.length"></span>)
+      </button>
+    </div>
+
+    <div class="chapter-list">
+      <template x-for="(ch, idx) in chapters" :key="ch.chapterUid || idx">
+        <label class="chapter-item" :class="{'selected': selectedChapters.includes(ch.chapterUid)}">
+          <input type="checkbox" :value="ch.chapterUid"
+                 @change="toggleChapter(ch.chapterUid, $event.target.checked)">
+          <span class="ch-title" x-text="ch.title"></span>
+          <span class="ch-words" x-text="ch.wordCount ? ch.wordCount + '字' : ''"></span>
+        </label>
+      </template>
+    </div>
+
+    <div x-show="loading" class="loading">加载章节列表...</div>
+  </div>
+
+  <!-- ======== DOWNLOAD PROGRESS VIEW ======== -->
+  <div x-show="view === 'progress'" class="view">
+    <div class="card">
+      <h2 x-text="'下载: ' + currentTask?.book_title"></h2>
+      <div class="progress-info">
+        <p>阶段: <span x-text="currentTask?.stage"></span></p>
+        <p x-text="currentTask?.message"></p>
+        <div class="progress-bar">
+          <div class="progress-fill"
+               :style="`width: ${currentTask?.total ? (currentTask?.current / currentTask?.total * 100) : 0}%`">
+          </div>
+        </div>
+        <p x-text="currentTask?.current + ' / ' + currentTask?.total"></p>
+      </div>
+
+      <div x-show="currentTask?.status === 'completed'" class="download-done">
+        <p>✅ 下载完成！</p>
+        <a :href="'/api/epub/' + epubFilename" class="primary-btn" download>下载 EPUB</a>
+      </div>
+      <div x-show="currentTask?.status === 'failed'" class="error">
+        <p x-text="'❌ ' + currentTask?.error"></p>
+      </div>
+      <div x-show="currentTask?.status === 'running'" class="download-actions">
+        <button @click="cancelDownload()">取消下载</button>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script src="/static/app.js"></script>
+</body>
+</html>
